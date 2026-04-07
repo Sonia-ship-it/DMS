@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   Diamond, Menu, Sparkles, FileText, ShieldCheck,
@@ -11,12 +11,36 @@ import { cn } from '@/lib/utils';
 export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [featuresVisible, setFeaturesVisible] = useState(false);
+  const [cursor, setCursor] = useState({ x: 50, y: 35 });
+  const featuresRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 40);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const previous = document.documentElement.style.scrollBehavior;
+    document.documentElement.style.scrollBehavior = 'smooth';
+    return () => {
+      document.documentElement.style.scrollBehavior = previous;
+    };
+  }, []);
+
+  useEffect(() => {
+    const target = featuresRef.current;
+    if (!target) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setFeaturesVisible(true);
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
   }, []);
 
   const scrollToSection = (e: React.MouseEvent, id: string) => {
@@ -70,6 +94,21 @@ export default function LandingPage() {
 
         .pulse-btn {
           animation: heroPulse 3s infinite ease-in-out;
+        }
+
+        @keyframes revealUp {
+          from { opacity: 0; transform: translateY(26px) scale(0.985); }
+          to { opacity: 1; transform: translateY(0px) scale(1); }
+        }
+
+        .feature-reveal {
+          opacity: 0;
+          transform: translateY(26px);
+        }
+
+        .feature-reveal.is-visible {
+          animation: revealUp 0.75s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+          animation-delay: var(--feature-delay, 0ms);
         }
       `}} />
 
@@ -128,7 +167,18 @@ export default function LandingPage() {
       )}
 
       {/* SECTION 2 — HERO */}
-      <section id="hero" className="relative w-full h-auto overflow-visible flex flex-col items-center pt-[100px] pb-24 md:pb-32 lg:pb-40" style={{ background: '#05071A' }}>
+      <section
+        id="hero"
+        className="relative w-full h-auto overflow-visible flex flex-col items-center pt-[100px] pb-24 md:pb-32 lg:pb-40"
+        style={{ background: '#05071A' }}
+        onMouseMove={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          setCursor({
+            x: ((e.clientX - rect.left) / rect.width) * 100,
+            y: ((e.clientY - rect.top) / rect.height) * 100,
+          });
+        }}
+      >
         
         {/* BACKGROUND LAYERS */}
         {/* Layer 0: Base gradient */}
@@ -158,6 +208,17 @@ export default function LandingPage() {
         {/* Layer 3: Glow Orbs */}
         <div className="absolute top-[-100px] left-[-100px] w-[500px] h-[500px] rounded-full pointer-events-none z-[3]" style={{ background: 'radial-gradient(circle, rgba(45,61,181,0.5) 0%, transparent 70%)', filter: 'blur(80px)' }} />
         <div className="absolute bottom-[-50px] right-[-50px] w-[300px] h-[300px] rounded-full pointer-events-none z-[3]" style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.25) 0%, transparent 70%)', filter: 'blur(60px)' }} />
+        <div
+          className="hidden md:block absolute pointer-events-none z-[4] w-[360px] h-[360px] rounded-full"
+          style={{
+            left: `${cursor.x}%`,
+            top: `${cursor.y}%`,
+            transform: 'translate(-50%, -50%)',
+            background: 'radial-gradient(circle, rgba(75,123,255,0.22) 0%, rgba(75,123,255,0.08) 35%, transparent 70%)',
+            filter: 'blur(22px)',
+            transition: 'left 160ms ease-out, top 160ms ease-out',
+          }}
+        />
 
         {/* Layer 4: Star Field */}
         <div className="absolute inset-0 z-[4] pointer-events-none opacity-[0.12]" style={{ backgroundImage: 'radial-gradient(rgba(255, 255, 255, 0.4) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
@@ -438,9 +499,9 @@ export default function LandingPage() {
       </section>
 
       {/* SECTION 4 — FEATURES */}
-      <section id="features" className="bg-[#F8FAFF] py-24 px-6">
+      <section ref={featuresRef} id="features" className="bg-[#F8FAFF] py-24 px-6">
         <div className="max-w-[1120px] mx-auto">
-          <div className="text-center">
+          <div className={cn("text-center feature-reveal", featuresVisible && "is-visible")} style={{ ['--feature-delay' as string]: '40ms' }}>
             <h2 className="text-[12px] text-[#4B7BFF] font-semibold uppercase tracking-widest">
               Features
             </h2>
@@ -453,7 +514,7 @@ export default function LandingPage() {
           </div>
 
           {/* LARGE FEATURE BLOCK 1 */}
-          <div className="mt-14 grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
+          <div className={cn("mt-14 grid grid-cols-1 md:grid-cols-12 gap-12 items-center feature-reveal", featuresVisible && "is-visible")} style={{ ['--feature-delay' as string]: '140ms' }}>
             <div className="md:col-span-5 order-2 md:order-1">
               {/* Product Mockup Image built in HTML/CSS */}
               <div className="bg-brand-50 rounded-3xl p-8 flex items-center justify-center">
@@ -524,7 +585,7 @@ export default function LandingPage() {
           </div>
 
           {/* LARGE FEATURE BLOCK 2 */}
-          <div className="mt-20 grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
+          <div className={cn("mt-20 grid grid-cols-1 md:grid-cols-12 gap-12 items-center feature-reveal", featuresVisible && "is-visible")} style={{ ['--feature-delay' as string]: '240ms' }}>
             <div className="md:col-span-7 md:pr-6">
               <div className="inline-flex items-center px-3 py-1 rounded-full bg-brand-100 text-brand-600 text-[11px] font-medium">
                 AI Chat Assistant
@@ -593,7 +654,7 @@ export default function LandingPage() {
           </div>
 
           {/* Feature Grid */}
-          <div className="mt-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <div className={cn("mt-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 feature-reveal", featuresVisible && "is-visible")} style={{ ['--feature-delay' as string]: '320ms' }}>
             
             <div className="bg-white border-[1.5px] border-slate-200 rounded-xl p-6 hover:border-brand-300 hover:shadow-sm transition-all">
               <div className="w-[40px] h-[40px] rounded-lg bg-brand-50 flex items-center justify-center mb-4">
