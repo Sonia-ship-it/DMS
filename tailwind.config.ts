@@ -51,7 +51,7 @@ export default {
           foreground: "hsl(var(--card-foreground))",
         },
         brand: {
-          50:  '#EEF0FD',
+          50: '#EEF0FD',
           100: '#CDD5F8',
           200: '#9AAAF0',
           300: '#6B7FE8',
@@ -63,7 +63,6 @@ export default {
           900: '#0A0E2E',
           950: '#05071A',
         },
-        accent: '#4B7BFF',
         teal: {
           DEFAULT: "hsl(var(--teal))",
           foreground: "hsl(var(--teal-foreground))",

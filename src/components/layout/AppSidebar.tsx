@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { LayoutDashboard, Briefcase, Users, Sparkles, Settings, Menu, X, Diamond } from 'lucide-react';
+import { LayoutDashboard, Users, FileText, ClipboardList, Settings, Menu, X, ShieldAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Avatar } from '@/components/intore/Avatar';
+import { Avatar } from '@/components/RCA/Avatar';
 import { useAuthStore } from '@/stores/authStore';
 
 const navItems = [
-  { label: 'Dashboard', path: '/recruiter/dashboard', icon: LayoutDashboard },
-  { label: 'Jobs', path: '/recruiter/jobs', icon: Briefcase },
-  { label: 'Candidates', path: '/recruiter/candidates', icon: Users },
-  { label: 'Screenings', path: '/recruiter/screenings', icon: Sparkles },
-  { label: 'Settings', path: '/recruiter/settings', icon: Settings },
+  { label: 'Dashboard', path: '/discipline/dashboard', icon: LayoutDashboard },
+  { label: 'Students', path: '/discipline/students', icon: Users },
+  { label: 'Staff Management', path: '/discipline/staff', icon: ShieldAlert },
+  { label: 'Discipline Records', path: '/discipline/records', icon: FileText },
+  { label: 'Leave Permits', path: '/discipline/permits', icon: ClipboardList },
+  { label: 'Settings', path: '/discipline/settings', icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -24,15 +25,15 @@ export function AppSidebar() {
   const nav = (
     <div className="flex flex-col h-full">
       <div className="p-6">
-        <Link href="/recruiter/dashboard" className="flex items-center gap-2">
+        <Link href="/discipline/dashboard" className="flex items-center gap-2">
           <div className="bg-[#0F1547] p-1 rounded-md flex items-center justify-center shadow-sm border border-[rgba(75,123,255,0.3)]">
-            <Diamond className="h-5 w-5 text-[#4B7BFF] fill-[#4B7BFF]" />
+            <ShieldAlert className="h-5 w-5 text-[#4B7BFF] fill-[#4B7BFF]" />
           </div>
-          <span className="text-xl font-bold text-white">Intore</span>
+          <span className="text-xl font-bold text-white uppercase tracking-tight">RCA</span>
         </Link>
       </div>
 
-      <nav className="flex-1 px-3 space-y-1">
+      <nav className="flex-1 pl-3 space-y-1">
         {navItems.map((item) => (
           <Link
             key={item.path}

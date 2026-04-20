@@ -5,59 +5,128 @@ import { Diamond, Briefcase, User, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 export default function RegisterPage() {
   const router = useRouter();
   const { register } = useAuthStore();
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState<'recruiter' | 'applicant'>('recruiter');
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    register(name || 'New User', email || 'user@intore.ai', password, role);
-    router.push(role === 'recruiter' ? '/recruiter/dashboard' : '/');
+    setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    try {
+      await register(firstName, lastName, email, phoneNumber, password, 'staff');
+      toast.success('Strategy initialized: Account active');
+      router.push('/login');
+    } catch (err: any) {
+      setError(err.message || 'Registration failed');
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <div className="bg-card rounded-xl shadow-md border p-8 w-full max-w-md">
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <Diamond className="h-8 w-8 text-primary" />
-          <span className="text-2xl font-bold">Intore</span>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 dark:bg-slate-950">
+      <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 p-10 w-full max-w-lg animate-in zoom-in-95 duration-500">
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <Diamond className="h-10 w-10 text-brand-600 fill-brand-600/10" />
+          <span className="text-3xl font-black tracking-tighter uppercase">RCA Terminal</span>
         </div>
-        <h2 className="text-xl font-semibold text-center mb-6">Create your account</h2>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <label className="block text-sm font-medium">Full Name
-            <input value={name} onChange={(e) => setName(e.target.value)} className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
-          </label>
-          <label className="block text-sm font-medium">Email
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
-          </label>
-          <label className="block text-sm font-medium">Password
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
-          </label>
-          <label className="block text-sm font-medium">Confirm Password
-            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" />
-          </label>
+        <div className="text-center mb-10">
+          <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-widest">Account Provisioning</h2>
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Initialize your administrative tactical access</p>
+        </div>
 
-          <div>
-            <p className="text-sm font-medium mb-3">I am a...</p>
-            <div className="grid grid-cols-2 gap-3">
-              {([['recruiter', Briefcase, "I'm a Recruiter"], ['applicant', User, "I'm an Applicant"]] as const).map(([r, Icon, label]) => (
-                <button key={r} type="button" onClick={() => setRole(r)} className={cn('relative flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-colors', role === r ? 'border-primary bg-brand-50 dark:bg-[rgba(75,123,255,0.1)]' : 'border-border hover:border-muted-foreground/30')}>
-                  {role === r && <Check className="absolute top-2 right-2 h-4 w-4 text-primary" />}
-                  <Icon className="h-6 w-6" />
-                  <span className="text-sm font-medium">{label}</span>
-                </button>
-              ))}
+        {error && (
+          <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-900/10 text-rose-600 text-xs rounded-2xl border border-rose-100 dark:border-rose-800 text-center font-black uppercase tracking-widest animate-in slide-in-from-top-2">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">First Name</label>
+              <input
+                required
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-brand-500/20 font-bold transition-all"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Last Name</label>
+              <input
+                required
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-brand-500/20 font-bold transition-all"
+              />
             </div>
           </div>
 
-          <Button type="submit" className="w-full">Create Account</Button>
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Secure Email Uplink</label>
+            <input
+              required
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-brand-500/20 font-bold transition-all"
+              placeholder="operator@rca.ac.rw"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Comms Liaison (Phone)</label>
+            <input
+              required
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-brand-500/20 font-bold transition-all"
+              placeholder="+250 788 000 000"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Cipher Key</label>
+              <input
+                required
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-brand-500/20 font-bold transition-all"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Verify Cipher</label>
+              <input
+                required
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-brand-500/20 font-bold transition-all"
+              />
+            </div>
+          </div>
+
+          <Button type="submit" className="w-full py-7 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-brand-500/20 transition-all hover:scale-[1.02] active:scale-95">
+            Initialize Account
+          </Button>
         </form>
 
         <p className="text-sm text-center mt-6 text-muted-foreground">

@@ -32,7 +32,7 @@ export function AIChatFAB() {
     {
       id: '1',
       role: 'ai',
-      content: "Hi! I'm your Intore AI assistant. Ask me about your candidates, screening results, or hiring pipeline. 🇷🇼",
+      content: "Hi! I'm your RCA AI assistant. Ask me about your candidates, screening results, or hiring pipeline. 🇷🇼",
     },
   ]);
   const [input, setInput] = useState('');
@@ -90,7 +90,7 @@ export function AIChatFAB() {
               <Sparkles className="w-4 h-4 text-white" />
             </div>
             <div>
-              <div className="text-[13px] font-semibold text-white">Intore AI</div>
+              <div className="text-[13px] font-semibold text-white">RCA AI</div>
               <div className="text-[10px] text-white/50">Always ready to help</div>
             </div>
           </div>
@@ -114,7 +114,7 @@ export function AIChatFAB() {
             >
               {msg.role === 'ai' && (
                 <div className="w-6 h-6 rounded-md bg-brand-50 border border-brand-100 flex items-center justify-center shrink-0 mt-0.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#4B7BFF]" />
+                  <Sparkles className="w-3.5 h-3.5 text-[#EA580C]" />
                 </div>
               )}
               <div
@@ -183,7 +183,7 @@ export function AIChatFAB() {
               disabled={!input.trim()}
               className="p-1 rounded-md hover:bg-brand-50 transition-colors disabled:opacity-30"
             >
-              <Send className="w-4 h-4 text-[#4B7BFF]" />
+              <Send className="w-4 h-4 text-[#EA580C]" />
             </button>
           </div>
         </div>

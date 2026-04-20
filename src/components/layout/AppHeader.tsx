@@ -27,7 +27,7 @@ export function AppHeader({ title }: { title: string }) {
       <h1 className="text-xl font-semibold ml-10 md:ml-0" style={{ color: 'white' }}>{title}</h1>
 
       <div className="flex items-center gap-4">
-        <Link href="/recruiter/jobs/new" className="post-job-btn hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: '#4B7BFF', color: 'white' }}>
+        <Link href="/discipline/jobs/new" className="post-job-btn hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: '#4B7BFF', color: 'white' }}>
           <Plus className="h-4 w-4" /> Post a job
         </Link>
         <div className="header-search hidden lg:flex items-center gap-2 rounded-lg px-3 py-2" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
@@ -54,10 +54,10 @@ export function AppHeader({ title }: { title: string }) {
 
           {dropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-card rounded-xl shadow-md border py-1 animate-fade-in">
-              <button onClick={() => { setDropdownOpen(false); router.push('/recruiter/settings'); }} className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-muted transition-colors">
+              <button onClick={() => { setDropdownOpen(false); router.push('/discipline/settings'); }} className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-muted transition-colors">
                 <User className="h-4 w-4" /> Profile
               </button>
-              <button onClick={() => { setDropdownOpen(false); router.push('/recruiter/settings'); }} className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-muted transition-colors">
+              <button onClick={() => { setDropdownOpen(false); router.push('/discipline/settings'); }} className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-muted transition-colors">
                 <Settings className="h-4 w-4" /> Settings
               </button>
               <hr className="my-1 border-border" />

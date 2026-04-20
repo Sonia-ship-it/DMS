@@ -1,3 +1,5 @@
-import LandingPage from "@/pages/LandingPage";
+import LoginPage from "@/pages/auth/Login";
 
-export default LandingPage;
+export default LoginPage;
+
+

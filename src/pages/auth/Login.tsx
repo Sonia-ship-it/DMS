@@ -1,55 +1,113 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { Diamond, Briefcase, User } from 'lucide-react';
+import { Diamond, Shield, Lock, Mail, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/authStore';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuthStore();
+  const { login, isAuthenticated } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/discipline/dashboard');
+    }
+  }, [isAuthenticated, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login(email || 'alex@intore.ai', password);
-    router.push('/recruiter/dashboard');
+    setLoading(true);
+    setError('');
+
+    try {
+      await login(email, password);
+      toast.success('Authentication successful: Initializing Session');
+      router.push('/discipline/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Access Denied: Invalid Authentication Cipher');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
-      <div className="bg-card rounded-xl shadow-md border p-8 w-full max-w-md">
-        <div className="flex items-center justify-center gap-2 mb-6">
-          <Diamond className="h-8 w-8 text-primary" />
-          <span className="text-2xl font-bold">Intore</span>
-        </div>
-        <h2 className="text-xl font-semibold text-center mb-1">Welcome back</h2>
-        <p className="text-sm text-muted-foreground text-center mb-6">Sign in to your account</p>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <label className="block text-sm font-medium">Email
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" placeholder="you@example.com" />
-          </label>
-          <label className="block text-sm font-medium">Password
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring" placeholder="••••••••" />
-          </label>
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 text-sm"><input type="checkbox" className="rounded" /> Remember me</label>
-            <a href="#" className="text-sm text-primary hover:underline">Forgot password?</a>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-6">
+      <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-200 dark:border-slate-800 p-10 w-full max-w-md animate-in slide-in-from-bottom-8 duration-700">
+        <div className="flex items-center justify-center gap-3 mb-10">
+          <div className="bg-brand-600 p-2 rounded-xl shadow-lg shadow-brand-500/20">
+            <Diamond className="h-8 w-8 text-white fill-white/20" />
           </div>
-          <Button type="submit" className="w-full">Sign In</Button>
+          <span className="text-3xl font-black tracking-tighter uppercase">RCA Console</span>
+        </div>
+
+        <div className="text-center mb-10">
+          <h2 className="text-xl font-black text-slate-900 dark:text-white uppercase tracking-widest">Operator Login</h2>
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Authenticate to access operational matrix</p>
+        </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-900/10 text-rose-600 text-xs rounded-2xl border border-rose-100 dark:border-rose-800 text-center font-black uppercase tracking-widest animate-in shake duration-500">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Identifier</label>
+            <div className="relative group">
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-brand-600 transition-colors" />
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 pl-11 pr-5 py-4 text-sm outline-none focus:ring-2 focus:ring-brand-500/20 font-bold transition-all"
+                placeholder="operator@rca.ac.rw"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex justify-between items-center ml-1">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Cipher Key</label>
+              <a href="#" className="text-[10px] font-black text-brand-600 uppercase tracking-widest hover:underline decoration-2">Lost Key?</a>
+            </div>
+            <div className="relative group">
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-brand-600 transition-colors" />
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 pl-11 pr-5 py-4 text-sm outline-none focus:ring-2 focus:ring-brand-500/20 font-bold transition-all"
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full py-7 rounded-2xl bg-slate-900 dark:bg-white dark:text-slate-900 text-white font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-slate-950/20 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+            >
+              {loading ? 'Authenticating...' : 'Access Command Center'}
+            </Button>
+          </div>
         </form>
 
-        <div className="flex items-center gap-3 my-6">
-          <hr className="flex-1 border-border" /><span className="text-xs text-muted-foreground">or</span><hr className="flex-1 border-border" />
+        <div className="mt-10 text-center">
+          <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">
+            Non-authorized entity?
+            <Link href="/register" className="ml-2 text-brand-600 hover:underline decoration-2">Request Uplink</Link>
+          </p>
         </div>
-
-        <Button variant="outline" className="w-full">Sign in with Google</Button>
-
-        <p className="text-sm text-center mt-6 text-muted-foreground">
-          Don't have an account? <Link href="/register" className="text-primary hover:underline">Register</Link>
-        </p>
       </div>
     </div>
   );
