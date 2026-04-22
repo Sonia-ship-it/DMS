@@ -40,7 +40,7 @@ export default function CreateRecord() {
         setStudents(data);
       } catch (error) {
         console.error('Error fetching students:', error);
-        toast.error('Failed to load students matrix');
+        toast.error('Failed to load students');
       } finally {
         setFetching(false);
       }
@@ -63,11 +63,11 @@ export default function CreateRecord() {
         }),
       });
 
-      toast.success('Operational exit recorded successfully');
+      toast.success('Exit recorded successfully');
       router.push('/discipline/records');
     } catch (error: any) {
       console.error('Submit error:', error);
-      toast.error(`Authorization Error: ${error.message || 'Network failure in discipline uplink'}`);
+      toast.error(`Failed to record exit: ${error.message || 'Network error'}`);
     } finally {
       setSubmitting(false);
     }
@@ -76,146 +76,146 @@ export default function CreateRecord() {
   const selectedStudent = students.find(s => s.id === parseInt(form.studentId));
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950">
-      <AppHeader title="Deployment Protocol" />
+    <div className="min-h-screen bg-white text-[#0A0E2E]">
+      <AppHeader title="Record New Exit" />
       <div className="max-w-5xl mx-auto px-6 py-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
         <button
           onClick={() => router.back()}
-          className="flex items-center gap-2 text-slate-400 hover:text-brand-600 transition-colors mb-6 text-sm font-bold group"
+          className="flex items-center gap-2 text-[#0A0E2E]/60 hover:text-[#0A0E2E] transition-colors mb-6 text-sm font-semibold group"
         >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          RETURN TO LOGS
+          Back to Logs
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <section className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200 dark:border-slate-800 space-y-8">
+            <section className="bg-white rounded-3xl p-8 border border-[#0A0E2E]/15 shadow-sm space-y-8">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-900/20 flex items-center justify-center border border-brand-100 dark:border-brand-800">
-                  <Shield className="w-5 h-5 text-brand-600" />
+                <div className="w-10 h-10 rounded-xl bg-[#0A0E2E] flex items-center justify-center border border-[#0A0E2E]/15">
+                  <Shield className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">Exit Matrix Configuration</h3>
-                  <p className="text-xs text-slate-400 font-medium">Define parameters for student departure</p>
+                  <h3 className="font-bold text-2xl text-[#0A0E2E]">Exit Details</h3>
+                  <p className="text-sm text-[#0A0E2E]/70 font-medium">Enter the details for the student's exit</p>
                 </div>
               </div>
 
               <div className="space-y-6">
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Target Student</label>
+                  <label className="text-xs font-semibold text-slate-500 px-1">Student</label>
                   <select
                     ref={studentRef}
                     disabled={fetching}
                     value={form.studentId}
                     onChange={(e) => update('studentId', e.target.value)}
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); outDateRef.current?.focus(); } }}
-                    className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-brand-500/10 transition-all appearance-none"
+                    className="w-full rounded-2xl border border-[#0A0E2E]/15 bg-white px-4 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-[#0A0E2E]/20 transition-all appearance-none text-[#0A0E2E]"
                   >
-                    <option value="">Select subject...</option>
+                    <option value="">Select student...</option>
                     {students.map((s) => (
                       <option key={s.id} value={s.id}>
-                        {s.firstName} {s.lastName} — Level {s.year} {s.classGroup}
+                        {s.firstName} {s.lastName} — Year {s.year} {s.classGroup}
                       </option>
                     ))}
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Departure Timestamp</label>
+                  <label className="text-xs font-semibold text-slate-500 px-1">Date and Time of Exit</label>
                   <div className="relative">
-                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#0A0E2E]/50" />
                     <input
                       ref={outDateRef}
                       type="datetime-local"
                       value={form.outDate}
                       onChange={(e) => update('outDate', e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); reasonRef.current?.focus(); } }}
-                      className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 pl-11 pr-4 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-brand-500/10 transition-all shadow-inner"
+                      className="w-full rounded-2xl border border-[#0A0E2E]/15 bg-white pl-11 pr-4 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-[#0A0E2E]/20 transition-all text-[#0A0E2E]"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Authorization Reason</label>
+                  <label className="text-xs font-semibold text-slate-500 px-1">Reason</label>
                   <select
                     ref={reasonRef}
                     value={form.reason}
                     onChange={(e) => update('reason', e.target.value)}
-                    className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-3.5 text-sm font-bold outline-none focus:ring-4 focus:ring-brand-500/10 transition-all appearance-none"
+                    className="w-full rounded-2xl border border-[#0A0E2E]/15 bg-white px-4 py-3.5 text-sm font-medium outline-none focus:ring-2 focus:ring-[#0A0E2E]/20 transition-all appearance-none text-[#0A0E2E]"
                   >
-                    <option value="">Operational cause...</option>
+                    <option value="">Select a reason...</option>
                     {['Medical Checkup', 'Family Emergency', 'School Event', 'Official Errand', 'Holiday'].map((r) => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </div>
               </div>
             </section>
 
-            <section className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200 dark:border-slate-800 space-y-4">
+            <section className="bg-white rounded-3xl p-8 border border-[#0A0E2E]/15 shadow-sm space-y-4">
               <div className="flex items-center gap-3">
-                <FileText className="w-5 h-5 text-slate-400" />
-                <h3 className="font-black text-slate-900 dark:text-white uppercase tracking-tighter">Operational Notes</h3>
+                <FileText className="w-5 h-5 text-[#0A0E2E]/50" />
+                <h3 className="font-bold text-xl text-[#0A0E2E]">Notes</h3>
               </div>
               <textarea
                 value={form.description}
                 onChange={(e) => update('description', e.target.value)}
                 rows={4}
-                className="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-4 py-4 text-sm font-medium outline-none resize-none focus:ring-4 focus:ring-brand-500/10 transition-all placeholder:text-slate-500"
-                placeholder="Provide detailed context for this operational exit..."
+                className="w-full rounded-2xl border border-[#0A0E2E]/15 bg-white px-4 py-4 text-sm font-medium outline-none resize-none focus:ring-2 focus:ring-[#0A0E2E]/20 transition-all placeholder:text-[#0A0E2E]/40 text-[#0A0E2E]"
+                placeholder="Provide any additional details about the exit..."
               />
             </section>
           </div>
 
           <div className="space-y-6">
-            <div className="bg-slate-900 dark:bg-slate-900/50 rounded-3xl shadow-2xl p-8 space-y-6 text-white border border-slate-800 relative overflow-hidden">
-              <div className="absolute -top-10 -right-10 w-32 h-32 bg-brand-500/20 rounded-full blur-2xl" />
+            <div className="bg-[#0A0E2E] rounded-3xl shadow-xl p-8 space-y-6 text-white border border-[#0A0E2E]/15 relative overflow-hidden">
+              <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl" />
 
               <div className="relative z-10">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6 border-b border-slate-800 pb-2">PRE-DEBIT SUMMARY</p>
+                <p className="text-sm font-semibold text-white/50 mb-6 border-b border-white/10 pb-2">Summary</p>
 
                 <div className="space-y-4">
                   <div className="flex justify-between items-start">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Subject:</span>
-                    <span className={cn('text-sm font-black text-right', selectedStudent ? 'text-white' : 'text-slate-600 italic')}>
-                      {selectedStudent ? `${selectedStudent.firstName} ${selectedStudent.lastName}` : 'UNCONFIGURED'}
+                    <span className="text-xs font-semibold text-white/60">Student:</span>
+                    <span className={cn('text-sm font-bold text-right', selectedStudent ? 'text-white' : 'text-white/40 italic')}>
+                      {selectedStudent ? `${selectedStudent.firstName} ${selectedStudent.lastName}` : 'Not selected'}
                     </span>
                   </div>
                   <div className="flex justify-between items-start">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Protocol:</span>
-                    <span className={cn('text-sm font-black text-right capitalize', form.reason ? 'text-brand-400' : 'text-slate-600 italic')}>
-                      {form.reason || 'UNRESOLVED'}
+                    <span className="text-xs font-semibold text-white/60">Reason:</span>
+                    <span className={cn('text-sm font-bold text-right', form.reason ? 'text-white' : 'text-white/40 italic')}>
+                      {form.reason || 'Not selected'}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-tight">Initial Status:</span>
-                    <StatusBadge status="OUT" className="scale-90 origin-right" />
+                    <span className="text-xs font-semibold text-white/60">Status:</span>
+                    <StatusBadge status="OUT" className="scale-90 origin-right border-white/20 bg-white/10 text-white" />
                   </div>
                 </div>
 
                 <div className="mt-10 space-y-3">
                   <Button
-                    className="w-full rounded-2xl py-6 bg-brand-600 hover:bg-brand-700 text-white font-black uppercase tracking-widest shadow-xl shadow-brand-500/20 transition-all duration-300 disabled:opacity-50 group"
+                    className="w-full rounded-2xl py-6 bg-white hover:bg-white/90 text-[#0A0E2E] font-bold shadow-xl transition-all duration-300 disabled:opacity-50 group"
                     onClick={handleSubmit}
                     disabled={!form.studentId || !form.reason || submitting}
                   >
-                    {submitting ? 'PROCESSING...' : 'INITIALIZE EXIT'}
+                    {submitting ? 'Processing...' : 'Record Exit'}
                     {!submitting && <Send className="ml-2 w-4 h-4 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />}
                   </Button>
                   <Button
                     variant="ghost"
-                    className="w-full rounded-2xl py-6 text-slate-500 hover:text-white font-bold text-xs uppercase transition-colors"
+                    className="w-full rounded-2xl py-6 text-white/50 hover:text-white hover:bg-white/10 font-semibold text-sm transition-colors"
                     onClick={() => router.push('/discipline/records')}
                   >
-                    Abort Operation
+                    Cancel
                   </Button>
                 </div>
               </div>
             </div>
 
-            <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/20 rounded-3xl p-6 flex gap-3">
+            <div className="bg-amber-50 border border-amber-200 rounded-3xl p-6 flex gap-3">
               <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
-              <p className="text-[11px] font-bold text-amber-800 dark:text-amber-400 leading-relaxed uppercase tracking-tight">
-                Warning: Initializing a student exit will update their matrix status in the registry. Ensure all guardian alerts have been dispatched.
+              <p className="text-sm font-medium text-amber-800 leading-relaxed">
+                Warning: Recording this exit will update the student's status. Please make sure the student's guardians have been notified.
               </p>
             </div>
           </div>

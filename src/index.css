@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -112,7 +113,7 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Urbanist', system-ui, sans-serif;
   }
 }
 
@@ -287,7 +288,7 @@
 }
 
 .dark .app-header {
-  background: linear-gradient(135deg, #0A0E2E 0%, #0F1547 60%, #1E2A8A 100%) !important;
+  background: #1A264A !important;
 }
 
 /* ═══════════════════════════════════════════
@@ -350,7 +351,7 @@
    ═══════════════════════════════════════════ */
 
 .app-header {
-  background: linear-gradient(135deg, #0A0E2E 0%, #0F1547 60%, #1E2A8A 100%) !important;
+  background: #1A264A !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 

@@ -27,13 +27,6 @@ export function AppHeader({ title }: { title: string }) {
       <h1 className="text-xl font-semibold ml-10 md:ml-0" style={{ color: 'white' }}>{title}</h1>
 
       <div className="flex items-center gap-4">
-        <Link href="/discipline/jobs/new" className="post-job-btn hidden sm:flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors" style={{ background: '#4B7BFF', color: 'white' }}>
-          <Plus className="h-4 w-4" /> Post a job
-        </Link>
-        <div className="header-search hidden lg:flex items-center gap-2 rounded-lg px-3 py-2" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-          <Search className="search-icon h-4 w-4" style={{ color: 'rgba(255,255,255,0.4)' }} />
-          <input placeholder="Search jobs..." className="bg-transparent text-sm outline-none w-48" style={{ color: 'white' }} />
-        </div>
 
         <button onClick={toggle} className="theme-toggle p-2 rounded-lg transition-colors" style={{ color: 'white', opacity: 0.7 }} aria-label="Toggle theme">
           {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
@@ -53,15 +46,15 @@ export function AppHeader({ title }: { title: string }) {
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-card rounded-xl shadow-md border py-1 animate-fade-in">
-              <button onClick={() => { setDropdownOpen(false); router.push('/discipline/settings'); }} className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-muted transition-colors">
+            <div className="absolute right-0 mt-3 w-48 bg-[#0A0E2E] rounded-xl shadow-2xl border border-white/10 py-2 animate-fade-in text-white/90">
+              <button onClick={() => { setDropdownOpen(false); router.push('/discipline/settings'); }} className="flex items-center gap-3 w-full px-4 py-2.5 text-sm hover:bg-white/10 transition-colors">
                 <User className="h-4 w-4" /> Profile
               </button>
-              <button onClick={() => { setDropdownOpen(false); router.push('/discipline/settings'); }} className="flex items-center gap-2 w-full px-4 py-2 text-sm hover:bg-muted transition-colors">
+              <button onClick={() => { setDropdownOpen(false); router.push('/discipline/settings'); }} className="flex items-center gap-3 w-full px-4 py-2.5 text-sm hover:bg-white/10 transition-colors">
                 <Settings className="h-4 w-4" /> Settings
               </button>
-              <hr className="my-1 border-border" />
-              <button onClick={() => { logout(); router.push('/login'); }} className="flex items-center gap-2 w-full px-4 py-2 text-sm text-destructive hover:bg-muted transition-colors">
+              <div className="h-px w-full bg-white/10 my-1" />
+              <button onClick={() => { logout(); router.push('/login'); }} className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors">
                 <LogOut className="h-4 w-4" /> Logout
               </button>
             </div>

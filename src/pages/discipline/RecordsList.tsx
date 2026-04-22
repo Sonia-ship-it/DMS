@@ -66,19 +66,19 @@ export default function RecordsList() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950">
-      <AppHeader title="Discipline Operations" />
+    <div className="min-h-screen bg-white text-[#0A0E2E]">
+      <AppHeader title="Discipline Records" />
       <div className="max-w-7xl mx-auto px-6 py-8 animate-in slide-in-from-bottom-4 duration-500">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-              Operational Logs
-              <span className="text-xs font-medium px-2 py-0.5 bg-brand-100 text-brand-700 rounded-full">{records.length} TOTAL</span>
+            <h2 className="text-2xl font-bold text-[#0A0E2E] flex items-center gap-3">
+              Exit Logs
+              <span className="text-xs font-medium px-2 py-0.5 bg-[#0A0E2E]/10 text-[#0A0E2E] rounded-full">{records.length} TOTAL</span>
             </h2>
-            <p className="text-slate-400 text-sm mt-1 font-medium">Monitoring and managing active exits across the campus.</p>
+            <p className="text-[#0A0E2E]/70 text-sm mt-1 font-medium">Monitoring and managing active student exits.</p>
           </div>
           <Button
-            className="rounded-xl bg-brand-600 hover:bg-brand-700 shadow-lg shadow-brand-500/20"
+            className="rounded-xl bg-[#0A0E2E] text-white hover:bg-[#0A0E2E]/90 shadow-lg shadow-[#0A0E2E]/20"
             onClick={() => router.push('/discipline/records/new')}
           >
             <Plus className="h-4 w-4 mr-2" /> Record New Exit
@@ -110,26 +110,26 @@ export default function RecordsList() {
         </div>
 
         {loading ? (
-          <div className="p-20 text-center space-y-4 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm">
-            <div className="w-12 h-12 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto" />
-            <p className="text-slate-500 font-medium tracking-wide">Synchronizing logs...</p>
+          <div className="p-20 text-center space-y-4 rounded-3xl border border-[#0A0E2E]/15 bg-white shadow-sm">
+            <div className="w-12 h-12 border-4 border-[#0A0E2E] border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-[#0A0E2E]/70 font-medium tracking-wide">Loading records...</p>
           </div>
         ) : filtered.length === 0 ? (
           <EmptyState
             icon={FileText}
-            title="Log Matrix Empty"
-            description="No matching records were found in the current operational scope."
-            actionLabel="Initialize Record"
+            title="No Records Found"
+            description="No matching records were found for your search."
+            actionLabel="New Record"
             onAction={() => router.push('/discipline/records/new')}
           />
         ) : (
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <div className="bg-white rounded-3xl shadow-sm border border-[#0A0E2E]/15 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead className="bg-slate-50/50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800">
+                <thead className="bg-[#0A0E2E]/5 border-b border-[#0A0E2E]/10">
                   <tr>
-                    {['Student Matrix', 'Reason for Exit', 'Time stamps', 'Status', 'Actions'].map((h) => (
-                      <th key={h} className="px-6 py-5 text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-widest">{h}</th>
+                    {['Student Name', 'Reason for Exit', 'Time', 'Status', 'Actions'].map((h) => (
+                      <th key={h} className="px-6 py-5 text-sm font-semibold text-[#0A0E2E]">{h}</th>
                     ))}
                   </tr>
                 </thead>
