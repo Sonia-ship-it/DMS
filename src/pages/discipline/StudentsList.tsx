@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { AppHeader } from '@/components/layout/AppHeader';
-import { Avatar } from '@/components/RCA/Avatar';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/RCA/Badges';
 import {
@@ -12,10 +11,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Search, Filter, History, MoreHorizontal, User, Phone, MapPin, Trash2 } from 'lucide-react';
+import { Search, Filter, History, User, MapPin, Trash2, Users, UserCheck, AlertTriangle, Layers3, Pencil, Phone } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { toast } from 'sonner';
 import { NewStudentModal } from '@/components/discipline/NewStudentModal';
+import { DeleteConfirmationModal } from '@/components/discipline/DeleteConfirmationModal';
 
 interface StudentBackend {
   id: number;
@@ -37,6 +37,10 @@ export default function StudentsList() {
   const [loading, setLoading] = useState(true);
   const [classFilter, setClassFilter] = useState('All');
   const [searchFilter, setSearchFilter] = useState('');
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [studentToEdit, setStudentToEdit] = useState<StudentBackend | null>(null);
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -59,11 +63,8 @@ export default function StudentsList() {
     fetchStudents();
   }, []);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-
   const filtered = students.filter((s) => {
-    const className = `${s.year} ${s.classGroup}`;
+    const className = `Year ${s.year} ${s.classGroup}`;
     const fullName = `${s.firstName} ${s.lastName}`.toLowerCase();
 
     if (classFilter !== 'All' && className !== classFilter) return false;
@@ -71,138 +72,165 @@ export default function StudentsList() {
     return true;
   });
 
-  const classes = Array.from(new Set(students.map(s => `${s.year} ${s.classGroup}`)));
+  const classes = Array.from(new Set(students.map(s => `Year ${s.year} ${s.classGroup}`)));
+  const inCampusCount = students.filter((s) => s.status === 'IN').length;
+  const outsideCount = students.filter((s) => s.status === 'OUT').length;
+  const filteredCount = filtered.length;
 
   const getAvatarColor = (name: string) => {
-    const colors = ['bg-indigo-600', 'bg-emerald-600', 'bg-amber-600', 'bg-rose-600', 'bg-violet-600', 'bg-sky-600'];
+    const colors = ['bg-[#0A0E2E]', 'bg-[#1a264a]', 'bg-[#0F1547]'];
     const index = name.length % colors.length;
     return colors[index];
   };
 
+  const handleEdit = (student: StudentBackend) => {
+    setStudentToEdit(student);
+    setIsModalOpen(true);
+  };
+
+  const handleNew = () => {
+    setStudentToEdit(null);
+    setIsModalOpen(true);
+  };
+
   const handleDelete = async (id: number) => {
-    if (!confirm('Permanently revoke this student identity from the active registry?')) return;
+    setStudentToDelete(id);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!studentToDelete) return;
     try {
-      await apiFetch(`/students/${id}`, { method: 'DELETE' });
-      toast.success('Identity purged from matrix');
-      setStudents(prev => prev.filter(s => s.id !== id));
+      await apiFetch(`/students/${studentToDelete}`, { method: 'DELETE' });
+      toast.success('Student deleted successfully');
+      setStudents(prev => prev.filter(s => s.id !== studentToDelete));
     } catch (error) {
-      toast.error('Uplink failed: Could not purge identity');
+      toast.error('Failed to delete student');
+    } finally {
+      setDeleteModalOpen(false);
+      setStudentToDelete(null);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950">
-      <AppHeader title="Student Intelligence Terminal" />
+    <div className="min-h-screen bg-white text-[#0A0E2E]">
+      <AppHeader title="Students List" />
 
-      <div className="max-w-7xl mx-auto px-6 py-8 animate-in fade-in duration-700">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-          <div className="lg:col-span-3">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 backdrop-blur-xl bg-opacity-80">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input
-                    value={searchFilter}
-                    onChange={(e) => setSearchFilter(e.target.value)}
-                    placeholder="Search by student name..."
-                    className="w-full bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 pl-10 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-500/20 transition-all font-medium"
-                  />
-                </div>
+      <div className="mx-auto max-w-7xl px-6 py-8 animate-in fade-in duration-700">
+        <div className="mb-6 rounded-3xl border border-[#0A0E2E]/15 bg-white p-6 shadow-sm">
+          <div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-[#0A0E2E]">Students</h2>
+              <p className="text-sm font-medium text-[#0A0E2E]/70">View and manage all students in the system.</p>
+            </div>
+            <Button
+              onClick={handleNew}
+              className="rounded-xl bg-[#0A0E2E] text-white shadow-lg shadow-[#0A0E2E]/20 hover:bg-[#1a264a] transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              New Student
+            </Button>
+          </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2 px-3 py-2 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
-                    <Filter className="w-4 h-4 text-slate-400" />
-                    <select
-                      value={classFilter}
-                      onChange={(e) => setClassFilter(e.target.value)}
-                      className="bg-transparent text-sm font-semibold outline-none min-w-[120px]"
-                    >
-                      <option value="All">All Classes</option>
-                      {classes.map((c) => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                  </div>
-
-                  <Button
-                    onClick={() => setIsModalOpen(true)}
-                    className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white shadow-lg shadow-brand-500/20"
-                  >
-                    New Student
-                  </Button>
-                </div>
-              </div>
+          <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-2xl border border-[#0A0E2E]/15 bg-white p-4">
+              <div className="mb-2 inline-flex rounded-lg bg-[#0A0E2E] p-2 text-white"><Users className="h-4 w-4" /></div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#0A0E2E]/65">Total Students</p>
+              <p className="text-2xl font-extrabold text-[#0A0E2E]">{students.length}</p>
+            </div>
+            <div className="rounded-2xl border border-[#0A0E2E]/15 bg-white p-4">
+              <div className="mb-2 inline-flex rounded-lg bg-[#0A0E2E] p-2 text-white"><UserCheck className="h-4 w-4" /></div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#0A0E2E]/65">In Campus</p>
+              <p className="text-2xl font-extrabold text-[#0A0E2E]">{inCampusCount}</p>
+            </div>
+            <div className="rounded-2xl border border-[#0A0E2E]/15 bg-white p-4">
+              <div className="mb-2 inline-flex rounded-lg bg-[#0A0E2E] p-2 text-white"><AlertTriangle className="h-4 w-4" /></div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#0A0E2E]/65">Out of Campus</p>
+              <p className="text-2xl font-extrabold text-[#0A0E2E]">{outsideCount}</p>
+            </div>
+            <div className="rounded-2xl border border-[#0A0E2E]/15 bg-white p-4">
+              <div className="mb-2 inline-flex rounded-lg bg-[#0A0E2E] p-2 text-white"><Layers3 className="h-4 w-4" /></div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#0A0E2E]/65">Visible Results</p>
+              <p className="text-2xl font-extrabold text-[#0A0E2E]">{filteredCount}</p>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-brand-600 to-indigo-700 rounded-2xl p-6 text-white shadow-xl shadow-brand-500/20 flex flex-col justify-between">
-            <div>
-              <p className="text-brand-100 text-xs font-bold uppercase tracking-wider mb-1">Active Students</p>
-              <h3 className="text-3xl font-bold">{students.length}</h3>
+          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#0A0E2E]/50" />
+              <input
+                value={searchFilter}
+                onChange={(e) => setSearchFilter(e.target.value)}
+                placeholder="Search by student name..."
+                className="w-full rounded-xl border border-[#0A0E2E]/15 bg-white py-2.5 pl-10 pr-4 text-sm font-medium outline-none transition-all focus:ring-2 focus:ring-[#0A0E2E]/15"
+              />
             </div>
-            <div className="flex -space-x-2 mt-4 overflow-hidden">
-              {students.slice(0, 4).map((s, i) => (
-                <div key={i} className={`w-8 h-8 rounded-full border-2 border-brand-600 flex items-center justify-center text-[10px] font-bold ${getAvatarColor(s.firstName)}`}>
-                  {s.firstName[0]}{s.lastName[0]}
-                </div>
-              ))}
-              {students.length > 4 && (
-                <div className="w-8 h-8 rounded-full border-2 border-brand-600 bg-slate-800 flex items-center justify-center text-[10px] font-bold">
-                  +{students.length - 4}
-                </div>
-              )}
+
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 rounded-xl border border-[#0A0E2E]/15 bg-white px-3 py-2">
+                <Filter className="h-4 w-4 text-[#0A0E2E]/50" />
+                <select
+                  value={classFilter}
+                  onChange={(e) => setClassFilter(e.target.value)}
+                  className="min-w-[120px] bg-transparent text-sm font-semibold text-[#0A0E2E] outline-none"
+                >
+                  <option value="All">All Classes</option>
+                  {classes.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="overflow-hidden rounded-3xl border border-[#0A0E2E]/15 bg-white shadow-xl shadow-[#0A0E2E]/5">
           {loading ? (
             <div className="p-20 text-center space-y-4">
-              <div className="w-12 h-12 border-4 border-brand-500 border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-slate-500 font-medium animate-pulse">Initializing Terminal...</p>
+              <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-[#0A0E2E] border-t-transparent" />
+              <p className="animate-pulse font-medium text-[#0A0E2E]/70">Loading Students...</p>
             </div>
           ) : (
             <Table>
-              <TableHeader className="bg-slate-50/50 dark:bg-slate-950/50 border-b border-slate-200 dark:border-slate-800">
+              <TableHeader className="border-b border-[#0A0E2E]/10 bg-[#0A0E2E]/5">
                 <TableRow className="hover:bg-transparent border-none">
-                  <TableHead className="py-5 px-6 font-bold text-slate-800 dark:text-slate-200">Student Identity</TableHead>
-                  <TableHead className="font-bold text-slate-800 dark:text-slate-200">Class Matrix</TableHead>
-                  <TableHead className="font-bold text-slate-800 dark:text-slate-200">Guardian Details</TableHead>
-                  <TableHead className="font-bold text-slate-800 dark:text-slate-200 text-center">Engagement</TableHead>
-                  <TableHead className="font-bold text-slate-800 dark:text-slate-200">Current Status</TableHead>
-                  <TableHead className="font-bold text-slate-800 dark:text-slate-200 text-right">Operational Actions</TableHead>
+                  <TableHead className="px-6 py-5 font-bold text-[#0A0E2E]/80">Student Name</TableHead>
+                  <TableHead className="font-bold text-[#0A0E2E]/80">Class</TableHead>
+                  <TableHead className="font-bold text-[#0A0E2E]/80">Parent Contact</TableHead>
+                  <TableHead className="text-center font-bold text-[#0A0E2E]/80">Engagement</TableHead>
+                  <TableHead className="font-bold text-[#0A0E2E]/80">Current Status</TableHead>
+                  <TableHead className="text-right font-bold text-[#0A0E2E]/80">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.map((s) => (
-                  <TableRow key={s.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors border-slate-100 dark:border-slate-800">
+                  <TableRow key={s.id} className="group border-[#0A0E2E]/10 transition-colors hover:bg-[#0A0E2E]/5">
                     <TableCell className="py-4 px-6">
                       <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shadow-lg ${getAvatarColor(s.firstName)}`}>
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-xl text-white font-bold shadow-lg ${getAvatarColor(s.firstName)} transition-transform group-hover:scale-110`}>
                           {s.firstName[0]}{s.lastName[0]}
                         </div>
                         <div>
-                          <p className="font-bold text-[14px] text-slate-900 dark:text-slate-100 group-hover:text-brand-600 transition-colors">{s.firstName} {s.lastName}</p>
-                          <p className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-                            <User className="w-3 h-3" /> UID-{s.id.toString().padStart(4, '0')}
+                          <p className="text-[14px] font-bold text-[#0A0E2E] transition-colors">{s.firstName} {s.lastName}</p>
+                          <p className="flex items-center gap-1 text-[11px] font-medium text-[#0A0E2E]/60">
+                            <User className="h-3 w-3" /> UID-{s.id.toString().padStart(4, '0')}
                           </p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400">
-                          <MapPin className="w-4 h-4" />
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#0A0E2E] text-white">
+                          <MapPin className="h-4 w-4" />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold">{s.year}</p>
-                          <p className="text-[11px] text-slate-400 font-bold uppercase tracking-tighter">Level {s.classGroup}</p>
+                          <p className="text-sm font-semibold text-[#0A0E2E]">Year {s.year}</p>
+                          <p className="text-[11px] font-bold uppercase tracking-tighter text-[#0A0E2E]/60">{s.classGroup}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{s.fatherName || s.motherName}</p>
-                        <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
-                          <Phone className="w-3 h-3 text-brand-500" />
+                        <p className="text-xs font-bold text-[#0A0E2E]">{s.fatherName || s.motherName}</p>
+                        <div className="flex items-center gap-2 text-[11px] font-medium text-[#0A0E2E]/70">
+                          <Phone className="h-3 w-3 text-[#0A0E2E]" />
                           {s.fatherPhoneNumber || s.motherPhoneNumber}
                         </div>
                       </div>
@@ -210,25 +238,28 @@ export default function StudentsList() {
                     <TableCell className="text-center">
                       <button
                         onClick={() => router.push(`/discipline/records?studentId=${s.id}`)}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-brand-900/20 text-slate-600 dark:text-slate-400 hover:text-brand-600 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-brand-200 transition-all text-[11px] font-bold"
+                        className="inline-flex items-center gap-2 rounded-lg border border-[#0A0E2E]/20 bg-white px-3 py-1.5 text-[11px] font-bold text-[#0A0E2E] transition-all hover:bg-[#0A0E2E] hover:text-white"
                       >
-                        <History className="w-3.5 h-3.5" />
+                        <History className="h-3.5 w-3.5" />
                         {s.records?.length || 0} LOGS
                       </button>
                     </TableCell>
                     <TableCell>
-                      <StatusBadge status={s.status} />
+                      <StatusBadge status={s.status} className="border-[#0A0E2E] bg-[#0A0E2E] text-white" />
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400">
-                          <History className="w-4 h-4" />
-                        </Button>
+                        <button
+                          onClick={() => handleEdit(s)}
+                          className="flex h-8 w-8 items-center justify-center rounded-xl text-[#0A0E2E]/70 hover:bg-[#0A0E2E] hover:text-white transition-all hover:scale-110"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
                         <button
                           onClick={() => handleDelete(s.id)}
-                          className="h-8 w-8 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-900/20 flex items-center justify-center group/del"
+                          className="group/del flex h-8 w-8 items-center justify-center rounded-xl text-[#0A0E2E]/70 hover:bg-[#0A0E2E] hover:text-white transition-all hover:scale-110"
                         >
-                          <History className="w-4 h-4 text-slate-400 group-hover/del:text-rose-500" />
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </TableCell>
@@ -241,8 +272,19 @@ export default function StudentsList() {
       </div>
       <NewStudentModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => {
+          setIsModalOpen(false);
+          setStudentToEdit(null);
+        }}
         onSuccess={fetchStudents}
+        student={studentToEdit}
+      />
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Delete Student"
+        description="Are you sure you want to delete this student from the records?"
       />
     </div>
   );

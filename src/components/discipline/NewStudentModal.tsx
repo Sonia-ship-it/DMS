@@ -1,15 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Dialog,
     DialogContent,
     DialogHeader,
     DialogTitle,
-    DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Phone, MapPin, GraduationCap, ShieldCheck } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { User, Phone, GraduationCap, ShieldCheck, Mail } from 'lucide-react';
 import { apiFetch } from '@/lib/api';
 import { toast } from 'sonner';
 
@@ -17,9 +17,10 @@ interface NewStudentModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    student?: any; // If provided, it's edit mode
 }
 
-export function NewStudentModal({ isOpen, onClose, onSuccess }: NewStudentModalProps) {
+export function NewStudentModal({ isOpen, onClose, onSuccess, student }: NewStudentModalProps) {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         firstName: '',
@@ -32,23 +33,19 @@ export function NewStudentModal({ isOpen, onClose, onSuccess }: NewStudentModalP
         classGroup: '',
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-            await apiFetch('/students', {
-                method: 'POST',
-                body: JSON.stringify(formData),
+    useEffect(() => {
+        if (student) {
+            setFormData({
+                firstName: student.firstName || '',
+                lastName: student.lastName || '',
+                fatherName: student.fatherName || '',
+                motherName: student.motherName || '',
+                fatherPhoneNumber: student.fatherPhoneNumber || '',
+                motherPhoneNumber: student.motherPhoneNumber || '',
+                year: student.year?.toString() || '',
+                classGroup: student.classGroup || '',
             });
-            toast.success('New student identity registered in the matrix');
-            onSuccess();
-            onClose();
-            // Reset form
+        } else {
             setFormData({
                 firstName: '',
                 lastName: '',
@@ -59,9 +56,29 @@ export function NewStudentModal({ isOpen, onClose, onSuccess }: NewStudentModalP
                 year: '',
                 classGroup: '',
             });
+        }
+    }, [student, isOpen]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            if (student && !student.id) {
+                throw new Error('Student ID is missing. Cannot update.');
+            }
+            const url = student ? `/students/${student.id}` : '/students';
+            const method = student ? 'PATCH' : 'POST';
+
+            await apiFetch(url, {
+                method,
+                body: JSON.stringify(formData),
+            });
+
+            toast.success(student ? 'Student profile updated' : 'Student registered successfully');
+            onSuccess();
+            onClose();
         } catch (error: any) {
-            console.error('Error creating student:', error);
-            toast.error(error.message || 'Failed to register student identity');
+            toast.error(error.message || 'Operation failed');
         } finally {
             setLoading(false);
         }
@@ -69,166 +86,132 @@ export function NewStudentModal({ isOpen, onClose, onSuccess }: NewStudentModalP
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[600px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 rounded-3xl p-0 overflow-hidden outline-none">
-                <DialogHeader className="p-8 bg-slate-50/50 dark:bg-slate-950/50 border-b border-slate-100 dark:border-slate-800">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center border border-brand-500/20">
-                            <User className="w-5 h-5 text-brand-600" />
-                        </div>
-                        <div>
-                            <DialogTitle className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Register New Subject</DialogTitle>
-                            <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">Student Intelligence Registry</p>
-                        </div>
-                    </div>
-                </DialogHeader>
+            <DialogContent className="max-w-2xl rounded-3xl border-none bg-white p-0 overflow-hidden shadow-2xl">
+                <div className="bg-[#0A0E2E] p-8 text-white relative overflow-hidden">
+                    {/* Subtle glow */}
+                    <div className="absolute top-0 right-0 w-48 h-48 bg-blue-500/10 blur-[100px] rounded-full" />
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold tracking-tight">
+                            {student ? 'Edit Student Profile' : 'Register New Student'}
+                        </DialogTitle>
+                        <p className="text-white/60 text-sm font-medium mt-1">
+                            {student ? 'Update student records and guardian information.' : 'Enroll a new student into the management system.'}
+                        </p>
+                    </DialogHeader>
+                </div>
 
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
                     <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="firstName" className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">First Name</Label>
-                            <div className="relative">
-                                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-bold text-[#0A0E2E] uppercase tracking-widest flex items-center gap-2">
+                                <User className="h-4 w-4" /> Personal Details
+                            </h3>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-[#0A0E2E]/60 uppercase ml-1">First Name</Label>
                                 <Input
-                                    id="firstName"
-                                    name="firstName"
+                                    required
+                                    placeholder="Jean"
                                     value={formData.firstName}
-                                    onChange={handleChange}
-                                    required
-                                    placeholder="Subject name"
-                                    className="pl-11 rounded-2xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 font-bold"
+                                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                                    className="rounded-xl border-[#0A0E2E]/10 bg-slate-50 focus:bg-white h-12 text-sm font-bold"
                                 />
                             </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="lastName" className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Last Name</Label>
-                            <Input
-                                id="lastName"
-                                name="lastName"
-                                value={formData.lastName}
-                                onChange={handleChange}
-                                required
-                                placeholder="Surname"
-                                className="rounded-2xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 font-bold"
-                            />
-                        </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                            <Label htmlFor="year" className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Academic Year</Label>
-                            <div className="relative">
-                                <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                <select
-                                    id="year"
-                                    name="year"
-                                    value={formData.year}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full h-10 pl-11 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-500/20 appearance-none"
-                                >
-                                    <option value="">Select Year</option>
-                                    {['1', '2', '3', '4', '5', '6'].map(y => <option key={y} value={y}>Year {y}</option>)}
-                                </select>
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="classGroup" className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Class Group</Label>
-                            <div className="relative">
-                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                                <select
-                                    id="classGroup"
-                                    name="classGroup"
-                                    value={formData.classGroup}
-                                    onChange={handleChange}
-                                    required
-                                    className="w-full h-10 pl-11 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm font-bold outline-none focus:ring-2 focus:ring-brand-500/20 appearance-none"
-                                >
-                                    <option value="">Select Group</option>
-                                    {['A', 'B', 'C', 'D'].map(g => <option key={g} value={g}>Group {g}</option>)}
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="space-y-4 border-t border-slate-100 dark:border-slate-800 pt-6">
-                        <p className="text-[10px] font-black text-brand-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                            <ShieldCheck className="w-3 h-3" /> Guardian Logistics
-                        </p>
-
-                        <div className="grid grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <Label htmlFor="fatherName" className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Father's Name</Label>
+                                <Label className="text-xs font-bold text-[#0A0E2E]/60 uppercase ml-1">Last Name</Label>
                                 <Input
-                                    id="fatherName"
-                                    name="fatherName"
+                                    required
+                                    placeholder="Kabera"
+                                    value={formData.lastName}
+                                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                                    className="rounded-xl border-[#0A0E2E]/10 bg-slate-50 focus:bg-white h-12 text-sm font-bold"
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-bold text-[#0A0E2E]/60 uppercase ml-1">Year</Label>
+                                    <Select
+                                        value={formData.year}
+                                        onValueChange={(val) => setFormData({ ...formData, year: val })}
+                                    >
+                                        <SelectTrigger className="rounded-xl border-[#0A0E2E]/10 bg-slate-50 h-12 text-sm font-bold">
+                                            <SelectValue placeholder="Select" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="1">Year 1</SelectItem>
+                                            <SelectItem value="2">Year 2</SelectItem>
+                                            <SelectItem value="3">Year 3</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label className="text-xs font-bold text-[#0A0E2E]/60 uppercase ml-1">Class</Label>
+                                    <Select
+                                        value={formData.classGroup}
+                                        onValueChange={(val) => setFormData({ ...formData, classGroup: val })}
+                                    >
+                                        <SelectTrigger className="rounded-xl border-[#0A0E2E]/10 bg-slate-50 h-12 text-sm font-bold">
+                                            <SelectValue placeholder="Group" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="A">Class A</SelectItem>
+                                            <SelectItem value="B">Class B</SelectItem>
+                                            <SelectItem value="C">Class C</SelectItem>
+                                            <SelectItem value="D">Class D</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-bold text-[#0A0E2E] uppercase tracking-widest flex items-center gap-2">
+                                <ShieldCheck className="h-4 w-4" /> Guardian Info
+                            </h3>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-[#0A0E2E]/60 uppercase ml-1">Father's Name</Label>
+                                <Input
+                                    placeholder="Father's Full Name"
                                     value={formData.fatherName}
-                                    onChange={handleChange}
-                                    placeholder="Primary guardian"
-                                    className="rounded-2xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 font-bold"
+                                    onChange={(e) => setFormData({ ...formData, fatherName: e.target.value })}
+                                    className="rounded-xl border-[#0A0E2E]/10 bg-slate-50 focus:bg-white h-12 text-sm font-bold"
                                 />
                             </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="fatherPhoneNumber" className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Father's Phone</Label>
-                                <div className="relative">
-                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                                    <Input
-                                        id="fatherPhoneNumber"
-                                        name="fatherPhoneNumber"
-                                        value={formData.fatherPhoneNumber}
-                                        onChange={handleChange}
-                                        placeholder="+250..."
-                                        className="pl-11 rounded-2xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 font-bold"
-                                    />
-                                </div>
-                            </div>
-                        </div>
 
-                        <div className="grid grid-cols-2 gap-6">
                             <div className="space-y-2">
-                                <Label htmlFor="motherName" className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Mother's Name</Label>
+                                <Label className="text-xs font-bold text-[#0A0E2E]/60 uppercase ml-1">Father's Phone</Label>
                                 <Input
-                                    id="motherName"
-                                    name="motherName"
-                                    value={formData.motherName}
-                                    onChange={handleChange}
-                                    placeholder="Secondary guardian"
-                                    className="rounded-2xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 font-bold"
+                                    placeholder="+250 788 000 000"
+                                    value={formData.fatherPhoneNumber}
+                                    onChange={(e) => setFormData({ ...formData, fatherPhoneNumber: e.target.value })}
+                                    className="rounded-xl border-[#0A0E2E]/10 bg-slate-50 focus:bg-white h-12 text-sm font-bold"
                                 />
                             </div>
+
                             <div className="space-y-2">
-                                <Label htmlFor="motherPhoneNumber" className="text-[11px] font-black text-slate-400 uppercase tracking-widest px-1">Mother's Phone</Label>
-                                <div className="relative">
-                                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
-                                    <Input
-                                        id="motherPhoneNumber"
-                                        name="motherPhoneNumber"
-                                        value={formData.motherPhoneNumber}
-                                        onChange={handleChange}
-                                        placeholder="+250..."
-                                        className="pl-11 rounded-2xl bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 font-bold"
-                                    />
-                                </div>
+                                <Label className="text-xs font-bold text-[#0A0E2E]/60 uppercase ml-1">Mother's Name</Label>
+                                <Input
+                                    placeholder="Mother's Full Name"
+                                    value={formData.motherName}
+                                    onChange={(e) => setFormData({ ...formData, motherName: e.target.value })}
+                                    className="rounded-xl border-[#0A0E2E]/10 bg-slate-50 focus:bg-white h-12 text-sm font-bold"
+                                />
                             </div>
                         </div>
                     </div>
 
-                    <DialogFooter className="pt-4 border-t border-slate-100 dark:border-slate-800">
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={onClose}
-                            className="rounded-xl font-bold text-slate-500 hover:text-slate-900"
-                        >
-                            Cancel
-                        </Button>
+                    <div className="pt-4 border-t border-[#0A0E2E]/5">
                         <Button
                             type="submit"
                             disabled={loading}
-                            className="rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-black uppercase tracking-widest px-8 shadow-lg shadow-brand-500/20"
+                            className="w-full h-14 rounded-2xl bg-[#0A0E2E] hover:bg-[#1a264a] text-white font-bold text-sm uppercase tracking-widest shadow-xl shadow-[#0A0E2E]/20 transition-all hover:scale-[1.01] active:scale-[0.99]"
                         >
-                            {loading ? 'Processing...' : 'Deploy Identity'}
+                            {loading ? 'Processing...' : (student ? 'Save Changes' : 'Register Student')}
                         </Button>
-                    </DialogFooter>
+                    </div>
                 </form>
             </DialogContent>
         </Dialog>

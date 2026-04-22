@@ -26,9 +26,7 @@ export function AppSidebar() {
     <div className="flex flex-col h-full">
       <div className="p-6">
         <Link href="/discipline/dashboard" className="flex items-center gap-2">
-          <div className="bg-[#0F1547] p-1 rounded-md flex items-center justify-center shadow-sm border border-[rgba(75,123,255,0.3)]">
-            <ShieldAlert className="h-5 w-5 text-[#4B7BFF] fill-[#4B7BFF]" />
-          </div>
+          <img src="/rca-logo.jpg" alt="RCA Logo" className="h-8 w-8 rounded-md object-contain bg-white" />
           <span className="text-xl font-bold text-white uppercase tracking-tight">RCA</span>
         </Link>
       </div>

@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Urbanist', 'DM Sans', 'Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -140,6 +140,7 @@ export default {
         "progress-fill": "progress-fill 0.3s ease-out forwards",
         "fade-in": "fade-in 0.3s ease-out forwards",
         blink: "blink 1s step-end infinite",
+        "pulse-slow": "pulse 12s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
     },
   },

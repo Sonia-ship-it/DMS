@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Users, FileText, ClipboardList, CheckCircle2, ChevronUp, ChevronDown, Activity, Zap, Shield, Search } from 'lucide-react';
+import { Users, Activity, Zap, Shield, Search } from 'lucide-react';
 import Link from 'next/link';
 import { AppHeader } from '@/components/layout/AppHeader';
 import { StatusBadge } from '@/components/RCA/Badges';
-import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/authStore';
 import { apiFetch } from '@/lib/api';
 
@@ -49,49 +48,52 @@ export default function DisciplineDashboard() {
   const recentRecords = records.length > 0 ? records.slice(0, 5) : [];
 
   const stats = [
-    { label: 'Operational Exits', value: activePermitsCount, change: '+5%', icon: Zap, up: true, color: 'text-amber-500' },
-    { label: 'Total Student Matrix', value: students.length || 156, change: '+2', icon: Users, up: true, color: 'text-indigo-500' },
-    { label: 'Compliance Rate', value: '94%', change: '+1.2%', icon: Shield, up: true, color: 'text-emerald-500' },
-    { label: 'Security Alerts', value: 0, change: '-4', icon: Activity, up: false, color: 'text-rose-500' },
+    { label: 'Student Exits', value: activePermitsCount, change: '+5%', icon: Zap },
+    { label: 'Total Students', value: students.length || 156, change: '+2', icon: Users },
+    { label: 'Compliance Rate', value: '94%', icon: Shield },
+    { label: 'Alerts', value: 0, icon: Activity },
   ];
 
   const today = new Date();
   const dateStr = today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950">
-      <AppHeader title="Command Center" />
-      <div className="max-w-7xl mx-auto px-6 py-8 animate-in fade-in duration-1000">
+    <div className="min-h-screen bg-white font-sans text-[#0A0E2E]">
+      <AppHeader title="Dashboard" />
+      <div className="mx-auto max-w-7xl px-6 py-8 animate-in fade-in duration-1000">
 
-        <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="mb-10 flex flex-col justify-between gap-4 rounded-3xl border border-[#0A0E2E]/15 bg-white p-6 shadow-sm md:flex-row md:items-end">
           <div>
-            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">System Status: <span className="text-emerald-500">OPTIMAL</span></h2>
-            <p className="text-[14px] text-slate-400 mt-2 font-medium flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <h2 className="text-3xl font-extrabold tracking-tight text-[#0A0E2E]">Dashboard Overview</h2>
+            <p className="mt-2 flex items-center gap-2 text-[14px] font-medium text-[#0A0E2E]/70">
+              <span className="h-2 w-2 rounded-full bg-[#0A0E2E] animate-pulse" />
               Authenticated as {user?.name || 'Administrator'} • {dateStr}
             </p>
           </div>
-          <div className="flex gap-2">
-            <Link href="/discipline/records/new" className="px-5 py-2.5 bg-slate-900 dark:bg-white dark:text-slate-900 text-white rounded-xl text-sm font-bold shadow-xl hover:scale-105 transition-transform">
-              Deploy New Record
+          <div className="flex flex-wrap gap-2">
+            <Link href="/discipline/records/new" className="rounded-xl bg-[#0A0E2E] px-5 py-2.5 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#0A0E2E]/20">
+              New Record
+            </Link>
+            <Link href="/discipline/records" className="rounded-xl border border-[#0A0E2E]/20 bg-white px-5 py-2.5 text-sm font-bold text-[#0A0E2E] transition-all hover:-translate-y-0.5 hover:bg-[#0A0E2E]/5">
+              View All
             </Link>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="mb-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
-            <div key={stat.label} className="group bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 relative overflow-hidden transition-all hover:shadow-xl hover:-translate-y-1">
-              <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                <stat.icon size={80} />
+            <div key={stat.label} className="group relative overflow-hidden rounded-2xl border border-[#0A0E2E]/15 bg-white p-6 shadow-sm transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-[#0A0E2E]/10">
+              <div className="absolute right-0 top-0 p-3 opacity-[0.06] transition-opacity group-hover:opacity-[0.1]">
+                <stat.icon size={76} className="text-[#0A0E2E]" />
               </div>
               <div className="relative z-10">
-                <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-950 flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-800">
-                  <stat.icon className={cn('h-5 w-5', stat.color)} />
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl border border-[#0A0E2E]/15 bg-[#0A0E2E]">
+                  <stat.icon className="h-5 w-5 text-white" />
                 </div>
-                <p className="text-[12px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
-                <div className="flex items-end gap-3 mt-1">
-                  <p className="text-3xl font-black text-slate-900 dark:text-white leading-none">{stat.value}</p>
-                  <span className={cn('text-[11px] font-bold px-1.5 py-0.5 rounded-md mb-1', stat.up ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600')}>
+                <p className="text-[12px] font-bold uppercase tracking-[0.2em] text-[#0A0E2E]/70">{stat.label}</p>
+                <div className="mt-1 flex items-end gap-3">
+                  <p className="text-3xl font-black leading-none text-[#0A0E2E]">{stat.value}</p>
+                  <span className="mb-1 rounded-md bg-[#0A0E2E] px-1.5 py-0.5 text-[11px] font-bold text-white">
                     {stat.change}
                   </span>
                 </div>
@@ -100,50 +102,58 @@ export default function DisciplineDashboard() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 gap-8 lg:grid-cols-5">
           <div className="lg:col-span-3">
-            <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
-              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div className="overflow-hidden rounded-3xl border border-[#0A0E2E]/15 bg-white shadow-sm">
+              <div className="flex items-center justify-between border-b border-[#0A0E2E]/10 p-6">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Recent Log Activity</h2>
-                  <p className="text-xs text-slate-400 font-medium">Real-time sync from discipline database</p>
+                  <h2 className="text-lg font-bold text-[#0A0E2E]">Recent Exits</h2>
+                  <p className="text-xs font-medium text-[#0A0E2E]/70">Latest student movements</p>
                 </div>
-                <Link href="/discipline/records" className="text-xs font-bold text-brand-600 hover:text-brand-700 bg-brand-50 px-3 py-1.5 rounded-lg transition-colors">
-                  FULL ACCESS
+                <Link href="/discipline/records" className="rounded-lg bg-[#0A0E2E] px-3 py-1.5 text-xs font-bold text-white transition-opacity hover:opacity-90">
+                  VIEW ALL
                 </Link>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="bg-slate-50/50 dark:bg-slate-950/50 border-b border-slate-100 dark:border-slate-800 text-left">
-                      <th className="px-6 py-3 text-[10px] font-black text-slate-400 uppercase tracking-tighter">Entity</th>
-                      <th className="px-6 py-3 text-[10px] font-black text-slate-400 uppercase tracking-tighter">Reason</th>
-                      <th className="px-6 py-3 text-[10px] font-black text-slate-400 uppercase tracking-tighter">Status</th>
-                      <th className="px-6 py-3 text-[10px] font-black text-slate-400 uppercase tracking-tighter text-right">Ops</th>
+                    <tr className="border-b border-[#0A0E2E]/10 bg-[#0A0E2E]/5 text-left">
+                      <th className="px-6 py-3 text-[10px] font-black uppercase tracking-tighter text-[#0A0E2E]/70">Entity</th>
+                      <th className="px-6 py-3 text-[10px] font-black uppercase tracking-tighter text-[#0A0E2E]/70">Reason</th>
+                      <th className="px-6 py-3 text-[10px] font-black uppercase tracking-tighter text-[#0A0E2E]/70">Status</th>
+                      <th className="px-6 py-3 text-right text-[10px] font-black uppercase tracking-tighter text-[#0A0E2E]/70">Ops</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                  <tbody className="divide-y divide-[#0A0E2E]/10">
                     {loading ? (
                       [...Array(5)].map((_, i) => (
                         <tr key={i} className="animate-pulse">
-                          <td colSpan={4} className="px-6 py-4 h-14 bg-slate-50/30 dark:bg-slate-800/20" />
+                          <td colSpan={4} className="h-14 bg-[#0A0E2E]/5 px-6 py-4" />
                         </tr>
                       ))
-                    ) : recentRecords.map((record: any) => (
-                      <tr key={record.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                    ) : recentRecords.length > 0 ? recentRecords.map((record: any) => (
+                      <tr key={record.id} className="transition-colors hover:bg-[#0A0E2E]/5">
                         <td className="px-6 py-4">
-                          <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{record.student?.firstName} {record.student?.lastName}</p>
-                          <p className="text-[10px] text-slate-400 font-medium tracking-tight">UID-{record.studentId.toString().padStart(4, '0')}</p>
+                          <p className="text-sm font-bold text-[#0A0E2E]">{record.student?.firstName} {record.student?.lastName}</p>
+                          <p className="text-[10px] font-medium tracking-tight text-[#0A0E2E]/65">ID: {record.studentId}</p>
                         </td>
-                        <td className="px-6 py-4 text-sm font-medium text-slate-500">{record.reason}</td>
-                        <td className="px-6 py-4"><StatusBadge status={record.status} /></td>
+                        <td className="px-6 py-4 text-sm font-medium text-[#0A0E2E]/75">{record.reason}</td>
+                        <td className="px-6 py-4">
+                          <StatusBadge status={record.status} className="border-[#0A0E2E] bg-[#0A0E2E] text-white" />
+                        </td>
                         <td className="px-6 py-4 text-right">
-                          <Link href={`/discipline/records/${record.id}`} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg inline-block text-slate-400">
+                          <Link href={`/discipline/records/${record.id}`} className="inline-block rounded-lg p-2 text-[#0A0E2E]/70 transition-colors hover:bg-[#0A0E2E] hover:text-white">
                             <Search size={16} />
                           </Link>
                         </td>
                       </tr>
-                    ))}
+                    )) : (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-10 text-center text-sm font-medium text-[#0A0E2E]/65">
+                          No activity yet. Create a new record to populate this dashboard.
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -151,41 +161,35 @@ export default function DisciplineDashboard() {
           </div>
 
           <div className="lg:col-span-2">
-            <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden">
-              <div className="absolute -top-24 -right-24 w-64 h-64 bg-brand-500/10 rounded-full blur-3xl" />
-              <div className="relative z-10">
-                <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
-                  <Activity className="text-brand-500" size={20} />
-                  Live Infrastructure
-                </h2>
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-slate-700">
-                      <Shield size={20} className="text-emerald-500" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Database Sync</p>
-                      <p className="text-sm font-medium">PostgreSQL Cluster • <span className="text-emerald-500">Active</span></p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-800 flex items-center justify-center border border-slate-700">
-                      <Zap size={20} className="text-amber-500" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">API Latency</p>
-                      <p className="text-sm font-medium">Internal Gateway • <span className="text-amber-500">12ms</span></p>
-                    </div>
-                  </div>
-                  <div className="mt-8 pt-8 border-t border-slate-800">
-                    <p className="text-xs font-bold text-slate-500 mb-4">SYSTEM NOTIFICATIONS</p>
-                    <div className="space-y-3">
-                      <div className="p-3 bg-slate-800/50 rounded-xl border border-slate-700/50">
-                        <p className="text-[13px] leading-relaxed">Infrastructure successfully integrated with student matrix API.</p>
-                      </div>
-                    </div>
-                  </div>
+            <div className="overflow-hidden rounded-3xl border border-[#0A0E2E]/15 bg-white p-6 shadow-sm">
+              <h2 className="mb-5 text-lg font-bold text-[#0A0E2E]">Quick Overview</h2>
+
+              <div className="space-y-3">
+                <div className="rounded-xl border border-[#0A0E2E]/15 bg-white p-4">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[#0A0E2E]/60">Students in system</p>
+                  <p className="mt-1 text-2xl font-extrabold text-[#0A0E2E]">{students.length || 0}</p>
                 </div>
+                <div className="rounded-xl border border-[#0A0E2E]/15 bg-white p-4">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[#0A0E2E]/60">Active exits</p>
+                  <p className="mt-1 text-2xl font-extrabold text-[#0A0E2E]">{activePermitsCount}</p>
+                </div>
+                <div className="rounded-xl border border-[#0A0E2E]/15 bg-white p-4">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[#0A0E2E]/60">Latest update</p>
+                  <p className="mt-1 text-sm font-semibold text-[#0A0E2E]">
+                    {recentRecords[0]
+                      ? `${recentRecords[0].student?.firstName} ${recentRecords[0].student?.lastName} • ${recentRecords[0].status}`
+                      : 'No recent activity'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <Link href="/discipline/students" className="rounded-lg border border-[#0A0E2E]/20 bg-white px-3 py-2 text-center text-xs font-bold text-[#0A0E2E] transition-colors hover:bg-[#0A0E2E] hover:text-white">
+                  Manage Students
+                </Link>
+                <Link href="/discipline/records/new" className="rounded-lg bg-[#0A0E2E] px-3 py-2 text-center text-xs font-bold text-white transition-opacity hover:opacity-90">
+                  New Record
+                </Link>
               </div>
             </div>
           </div>

@@ -32,7 +32,14 @@ const initialToken = getStoredToken();
 const initialUser = initialToken ? decodeJWT(initialToken) : null;
 
 export const useAuthStore = create<AuthState>((set) => ({
-  user: initialUser ? { id: initialUser.sub, name: initialUser.email.split('@')[0], email: initialUser.email, role: initialUser.role } : null,
+  user: initialUser ? {
+    id: initialUser.sub,
+    name: (initialUser.firstName && initialUser.lastName) ? `${initialUser.firstName} ${initialUser.lastName}` :
+      (initialUser.given_name && initialUser.family_name) ? `${initialUser.given_name} ${initialUser.family_name}` :
+        (initialUser.name || initialUser.fullName || initialUser.full_name || initialUser.email.split('@')[0]),
+    email: initialUser.email,
+    role: initialUser.role
+  } : null,
   token: initialToken,
   role: 'discipline',
   isAuthenticated: !!initialToken,
@@ -50,7 +57,14 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       set({
         token,
-        user: decoded ? { id: decoded.sub, name: decoded.email.split('@')[0], email: decoded.email, role: decoded.role } : null,
+        user: decoded ? {
+          id: decoded.sub,
+          name: (decoded.firstName && decoded.lastName) ? `${decoded.firstName} ${decoded.lastName}` :
+            (decoded.given_name && decoded.family_name) ? `${decoded.given_name} ${decoded.family_name}` :
+              (decoded.name || decoded.fullName || decoded.full_name || decoded.email.split('@')[0]),
+          email: decoded.email,
+          role: decoded.role
+        } : null,
         isAuthenticated: true,
         role: role || 'discipline',
       });
